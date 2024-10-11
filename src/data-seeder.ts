@@ -1,0 +1,50 @@
+import { DataSource } from 'typeorm';
+import { Author } from './app.entity';
+import { Book } from './book.entity';
+
+interface Data {
+    name: string;
+    bio: string;
+};
+
+async function seed() {
+  const dataSource = new DataSource({
+    type: 'postgres',
+    host: 'localhost',
+    port: 5432,
+    username: 'postgres',
+    password: 'pwd',
+    database: 'database',
+    entities: [Author, Book],
+    synchronize: true,
+  });
+
+  await dataSource.initialize();
+
+  const author1 = new Author();
+  author1.name = 'J.K. Rowling';
+  author1.bio = 'Author of the Harry Potter series';
+
+  const author2 = new Author();
+  author2.name = 'George R.R. Martin';
+  author2.bio = 'Author of A Song of Ice and Fire';
+
+  await dataSource.manager.save(author1);
+  await dataSource.manager.save(author2);
+
+  const book1 = new Book();
+  book1.title = 'Harry Potter and the Philosopher\'s Stone';
+  book1.author = author1;
+
+  const book2 = new Book();
+  book2.title = 'A Game of Thrones';
+  book2.author = author2;
+
+  await dataSource.manager.save(book1);
+  await dataSource.manager.save(book2);
+
+  console.log('Seeding completed.');
+  await dataSource.destroy();
+}
+
+seed().catch(console.error);

@@ -1,0 +1,9 @@
+Comment lancer:
+- yarn start:dev
+
+Différents modes:
+
+-> curl -s http://localhost:3000/authors/1/explicit | jq
+-> curl -s http://localhost:3000/authors/1/lazy | jq
+-> curl -s http://localhost:3000/authors/1/eager | jq
+
