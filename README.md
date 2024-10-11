@@ -14,7 +14,7 @@ Cela permet d'économiser des ressources en ne chargeant que les données néces
 
 ## Explicit Loading
 
-Dans cette méthode, le développeur décide manuellement quand charger les entités liées.
+Dans cette méthode, on décide manuellement quand charger les entités liées.
 Cela offre un contrôle total sur le processus de chargement, permettant d'optimiser les performances, mais augmente la complexité du code et nécessite une gestion plus rigoureuse.
 
 ## Avantages et Inconvénients
