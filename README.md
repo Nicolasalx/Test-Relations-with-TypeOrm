@@ -25,7 +25,7 @@ Cela offre un contrôle total sur le processus de chargement, permettant d'optim
 | **Explicit Loading**| - Contrôle total sur les données chargées<br>- Performances optimisées si bien implémenté | - Plus complexe à gérer pour le développeur<br>- Risque de chargement manuel inefficace |
 
 
-## Fonctionnement pour chaque type
+## Exemple décomposé pour chaque type
 
 **Prennons un exemple avec cette base de données**
 ## Table: Author
@@ -49,7 +49,6 @@ Cela offre un contrôle total sur le processus de chargement, permettant d'optim
 |  4 | A Game of Thrones                                |        4 |
 |  5 | Harry Potter and the Philosopher's Stone         |        5 |
 
-
 ### Eager Loading
 
 L'eager loading permet de charger les données associées (par exemple, les livres d'un auteur) en une seule requête.
@@ -65,7 +64,6 @@ JOIN book ON author.id = book.authorId;
 On obtient une liste où chaque ligne contient les informations d'un auteur ainsi que le titre de son livre.
 ![Alt text](image.png)
 
-## Exemple décomposé
 
 ### Lazy Loading
 
