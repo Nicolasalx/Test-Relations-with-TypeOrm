@@ -1,73 +1,111 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# Eager VS Lazy VS Explicit
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Ce rapport est un compte rendu de la phase de test du chargement des relations de manères différentes: explicit, eager, et lazy.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Eager Loading
 
-## Description
+Cette méthode charge toutes les entités liées d'une seule requête lorsque l'entité principale est récupérée.
+Cela réduit le nombre de requêtes SQL, mais peut entraîner un chargement excessif de données, augmentant la consommation de mémoire.
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Lazy Loading
 
-## Installation
+Cette approche ne charge les entités liées que lorsqu'elles sont explicitement demandées.
+Cela permet d'économiser des ressources en ne chargeant que les données nécessaires, mais peut entraîner plusieurs requêtes supplémentaires si les données liées sont souvent accédées.
 
-```bash
-$ yarn install
+## Explicit Loading
+
+Dans cette méthode, le développeur décide manuellement quand charger les entités liées.
+Cela offre un contrôle total sur le processus de chargement, permettant d'optimiser les performances, mais augmente la complexité du code et nécessite une gestion plus rigoureuse.
+
+## Avantages et Inconvénients
+| Type               | Avantages                                  | Inconvénients                                  |
+|--------------------|--------------------------------------------|------------------------------------------------|
+| **Eager Loading**   | - Moins de requêtes SQL<br>- Chargement rapide de toutes les données liées | - Chargement potentiellement excessif<br>- Plus de consommation mémoire si beaucoup de relations |
+| **Lazy Loading**    | - Charge les données au besoin<br>- Moins de données chargées au départ | - Multiple requêtes SQL si mal utilisé (N+1 problem) |
+| **Explicit Loading**| - Contrôle total sur les données chargées<br>- Performances optimisées si bien implémenté | - Plus complexe à gérer pour le développeur<br>- Risque de chargement manuel inefficace |
+
+
+## Fonctionnement pour chaque type
+
+**Prennons un exemple avec cette base de données**
+## Table: Author
+
+| id |        name         |
+|----|---------------------|
+|  1 | J.K. Rowling        |
+|  2 | J.K. Rowling        |
+|  3 | George R.R. Martin  |
+|  4 | J.K. Rowling        |
+|  5 | George R.R. Martin  |
+
+
+## Table: Book
+
+| id |                  title                            | authorId |
+|----|--------------------------------------------------|----------|
+|  1 | Harry Potter and the Philosopher's Stone         |        1 |
+|  2 | A Game of Thrones                                |        2 |
+|  3 | Harry Potter and the Philosopher's Stone         |        3 |
+|  4 | A Game of Thrones                                |        4 |
+|  5 | Harry Potter and the Philosopher's Stone         |        5 |
+
+
+### Eager Loading
+
+L'eager loading permet de charger les données associées (par exemple, les livres d'un auteur) en une seule requête.
+Cela signifie que l'on peut récupéré tous les auteurs avec leurs livres dans une seule opération.
+
+**Exemple SQL**
+```
+SELECT author.*, book.* 
+FROM author 
+JOIN book ON author.id = book.authorId;
 ```
 
-## Running the app
+On obtient une liste où chaque ligne contient les informations d'un auteur ainsi que le titre de son livre.
+![Alt text](image.png)
 
-```bash
-# development
-$ yarn run start
+## Exemple décomposé
 
-# watch mode
-$ yarn run start:dev
+### Lazy Loading
 
-# production mode
-$ yarn run start:prod
+Le lazy loading charge les données associées uniquement lorsqu'elles sont demandées.
+Dans ce cas, on peut d'abord charger les auteurs, puis charger les livres seulement lorsque vous accédez à un auteur spécifique.
+
+1) Charger d'abord les auteurs
+
+```
+SELECT * FROM author;
 ```
 
-## Test
+2) Ensuite si on veut obtenir les livres d'un auteur spécifique
 
-```bash
-# unit tests
-$ yarn run test
-
-# e2e tests
-$ yarn run test:e2e
-
-# test coverage
-$ yarn run test:cov
+```
+SELECT * FROM book WHERE authorId = x;
 ```
 
-## Support
+Si on charge tous les auteurs, mais que l'on demande les livres pour un auteur spécifique (par exemple, J.K. Rowling), le résultat pour les livres serait:
+![Alt text](image-1.png)
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
 
-## Stay in touch
+### Explicit Loading
+L'explicit loading implique de charger explicitement les données associées après avoir chargé l'entité principale. Vous chargez d'abord les auteurs, puis vous chargez les livres pour chaque auteur sur demande.
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+1) On charge d'abord les auteurs:
+```
+SELECT * FROM author;
+```
 
-## License
+2) Pour chaque auteur, on charge explicitement les livres:
+```
+SELECT * FROM book WHERE authorId = x;
+```
 
-Nest is [MIT licensed](LICENSE).
+Le résultat serait similaire à celui du lazy loading, mais ici, on a un contrôle explicite sur quand et comment charger les livres. On pourrait obtenir un résultat pour chaque auteur comme celui-ci:
+
+![Alt text](image-2.png)
+
+
+## Résultat basé sur le code de ce repo
+
+![Alt text](image-3.png)
