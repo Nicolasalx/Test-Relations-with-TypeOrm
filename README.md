@@ -111,6 +111,7 @@ Le résultat serait similaire à celui du lazy loading, mais ici, on a un contr�
 ## Performances
 
 **Pour une base de données de 200k books et 200k authors**
+
 Le temps à prendre en compte est le temps "real"
 
 ![Alt text](image-4.png)
