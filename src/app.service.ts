@@ -1,36 +1,44 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Author } from './app.entity';
+import { Author } from './author.entity';
 import { Book } from './book.entity';
 
 @Injectable()
-export class AuthorService {
+export class AuthorsService {
   constructor(
     @InjectRepository(Author)
-    private authorRepository: Repository<Author>,
+    private authorsRepository: Repository<Author>,
     @InjectRepository(Book)
-    private bookRepository: Repository<Book>,
+    private booksRepository: Repository<Book>,
   ) {}
 
-  getAuthorWithBooksExplicitly(id: number) {
-    return this.authorRepository.findOne({
-      where: { id },
-      relations: ['books'], // Assurez-vous que les relations sont définies correctement
-    });
+  async createAuthor(name: string): Promise<Author> {
+    const author = this.authorsRepository.create({ name });
+    return this.authorsRepository.save(author);
   }
 
-  getAuthorWithBooksEager(id: number) {
-    return this.authorRepository.findOne({
-      where: { id },
-      relations: ['books'],
-    });
+  async createBook(authorId: number, title: string): Promise<Book> {
+    const author = await this.authorsRepository.findOneBy({ id: authorId });
+    const book = this.booksRepository.create({ title, author });
+    return this.booksRepository.save(book);
   }
 
-  getAuthorWithBooksLazy(id: number) {
-    return this.authorRepository.findOne({
-      where: { id },
-      relations: ['books'],
-    });
+  async findAuthorsWithBooksEager(): Promise<Author[]> {
+    return this.authorsRepository.find({ relations: ['books'] });
+  }
+
+  async findAuthorWithBooksLazy(authorId: number): Promise<Author> {
+    return this.authorsRepository.findOneBy({ id: authorId });
+  }
+
+  async findAuthorWithBooksExplicit(id: number): Promise<Author> {
+    const author = await this.authorsRepository.findOne({ where: { id } });
+    if (author) {
+      author.books = await this.booksRepository.find({
+        where: { author: { id } },
+      });
+    }
+    return author;
   }
 }

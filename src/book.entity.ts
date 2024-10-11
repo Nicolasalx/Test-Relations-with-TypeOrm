@@ -1,6 +1,5 @@
-// book.entity.ts
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
-import { Author } from './app.entity';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
+import { Author } from './author.entity';
 
 @Entity()
 export class Book {
@@ -10,6 +9,6 @@ export class Book {
   @Column()
   title: string;
 
-  @ManyToOne(() => Author, author => author.books) // Définir la relation
-  author: Author; // Assurez-vous que cette propriété est définie
+  @ManyToOne(() => Author, (author) => author.books)
+  author: Author;
 }

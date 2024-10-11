@@ -1,10 +1,9 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Author } from './app.entity';
-import { AuthorController } from './app.controller';
-import { AuthorService } from './app.service';
+import { Author } from './author.entity';
+import { AuthorsController } from './author.controller';
 import { Book } from './book.entity';
-import { BookRepository } from './book.repository';
+import { AuthorsService } from './app.service';
 
 @Module({
   imports: [
@@ -14,13 +13,13 @@ import { BookRepository } from './book.repository';
       port: 5432,
       username: 'postgres',
       password: 'pwd',
-      database: 'database',
-      entities: [Book, Author],  // Spécifiez ici toutes vos entités
-      synchronize: true,  // Pour synchroniser la base de données avec les entités
+      database: 'database3',
+      entities: [Author, Book],
+      synchronize: true,
     }),
-    TypeOrmModule.forFeature([Author, Book])  // Import du repository spécifique
+    TypeOrmModule.forFeature([Author, Book]),
   ],
-  providers: [AuthorService],
-  controllers: [AuthorController],
+  providers: [AuthorsService],
+  controllers: [AuthorsController],
 })
 export class AppModule {}
